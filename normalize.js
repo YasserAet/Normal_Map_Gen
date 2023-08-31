@@ -1,57 +1,78 @@
-function convertToNormalMap() {
-    const input = document.getElementById('imageInput');
-    const originalImage = document.getElementById('originalImage');
-    const normalMapCanvas = document.getElementById('normalMapCanvas');
-    const ctx = normalMapCanvas.getContext('2d');
+// Ensure you have Three.js included in your HTML file
+// <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
 
-    const file = input.files[0];
-    const reader = new FileReader();
+// Function to generate maps (occlusion, specular, and displacement)
+function generateMaps(inputImage) {
+    // Initialize a Three.js scene
+    const scene = new THREE.Scene();
 
-    reader.onload = function (e) {
-        originalImage.src = e.target.result;
+    // Initialize a Three.js renderer
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(400, 400);
 
-        const img = new Image();
-        img.src = e.target.result;
+    // Append the renderer to a container in your HTML
+    const canvasContainer = document.getElementById('canvas-container');
+    canvasContainer.innerHTML = ''; // Clear previous content
+    canvasContainer.appendChild(renderer.domElement);
 
-        img.onload = function () {
-            // Display the original image
-            ctx.drawImage(img, 0, 0);
+    // Create a camera
+    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    camera.position.z = 2;
 
-            // Generate a simple normal map (for demonstration purposes)
-            const imageData = ctx.getImageData(0, 0, img.width, img.height);
-            const normalMap = generateSimpleNormalMap(imageData);
+    // Load the image texture
+    const textureLoader = new THREE.TextureLoader();
+    const texture = textureLoader.load(inputImage);
 
-            // Display the generated normal map
-            ctx.putImageData(normalMap, 0, 0);
-        };
+    // Create a material using the image texture
+    const material = new THREE.MeshBasicMaterial({ map: texture });
+
+    // Create a geometry (e.g., a plane) to apply the material
+    const geometry = new THREE.PlaneGeometry(1, 1);
+    const mesh = new THREE.Mesh(geometry, material);
+
+    // Add the mesh to the scene
+    scene.add(mesh);
+
+    // Set up lights (you may need to adjust these for your specific needs)
+    const ambientLight = new THREE.AmbientLight(0x404040);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    directionalLight.position.set(1, 1, 1);
+    scene.add(directionalLight);
+
+    // Render the scene
+    const animate = () => {
+        requestAnimationFrame(animate);
+
+        // You can add animation or interaction here
+
+        renderer.render(scene, camera);
     };
 
-    reader.readAsDataURL(file);
+    animate();
+
+    // You can perform additional map generation here, e.g., using shaders and framebuffers
 }
 
-function generateSimpleNormalMap(imageData) {
-    const { width, height, data } = imageData;
-    const normalMapData = new Uint8ClampedArray(width * height * 4);
+// Event listener for file input
+const fileInput = document.getElementById('fileInput');
+fileInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
 
-    // Calculate normals for each pixel (simplified example)
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            const i = (y * width + x) * 4;
-            const r = data[i] / 255;
-            const g = data[i + 1] / 255;
-            const b = data[i + 2] / 255;
+    if (file) {
+        const reader = new FileReader();
 
-            const nx = 2.0 * r - 1.0;
-            const ny = 2.0 * g - 1.0;
-            const nz = b;
+        reader.onload = (e) => {
+            const image = new Image();
+            image.src = e.target.result;
 
-            // Convert the normal components to pixel values
-            normalMapData[i] = (nx + 1.0) * 0.5 * 255;
-            normalMapData[i + 1] = (ny + 1.0) * 0.5 * 255;
-            normalMapData[i + 2] = (nz + 1.0) * 0.5 * 255;
-            normalMapData[i + 3] = 255; // Alpha channel
-        }
+            image.onload = () => {
+                // Generate maps with the loaded image
+                generateMaps(image.src);
+            };
+        };
+
+        reader.readAsDataURL(file);
     }
-
-    return new ImageData(normalMapData, width, height);
-}
+});
