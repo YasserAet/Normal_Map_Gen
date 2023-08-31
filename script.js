@@ -38,33 +38,24 @@ scene.add(directionalLight);
 
 // Function to generate maps (occlusion, specular, and displacement)
 function generateMaps() {
-    // Create a renderer for off-screen rendering
-    const mapRenderer = new THREE.WebGLRenderer();
-    mapRenderer.setSize(400, 400);
-    
     // Create render targets for each map
     const occlusionTarget = new THREE.WebGLRenderTarget(400, 400);
     const specularTarget = new THREE.WebGLRenderTarget(400, 400);
     const displacementTarget = new THREE.WebGLRenderTarget(400, 400);
-    
-    // Create custom shaders for each map (you'll need to write these shaders)
-    const occlusionShader = createOcclusionShader();
-    const specularShader = createSpecularShader();
-    const displacementShader = createDisplacementShader();
-    
-    // Set the input texture for each shader
-    occlusionShader.uniforms.inputTexture.value = inputTexture;
-    specularShader.uniforms.inputTexture.value = inputTexture;
-    displacementShader.uniforms.inputTexture.value = inputTexture;
-    
+
+    // Use built-in shaders for occlusion, specular, and displacement
+    const occlusionPass = new THREE.ShaderPass(THREE.SSAOPass); // Requires the SSAOPass shader.
+    const specularPass = new THREE.ShaderPass(THREE.FXAAShader); // Requires the FXAAShader shader.
+    const displacementPass = new THREE.ShaderPass(THREE.DisplacementShader); // Requires the DisplacementShader shader.
+
     // Render the scene to generate maps
-    mapRenderer.render(scene, camera, occlusionTarget);
-    mapRenderer.render(scene, camera, specularTarget);
-    mapRenderer.render(scene, camera, displacementTarget);
-    
+    occlusionPass.render(renderer, occlusionTarget);
+    specularPass.render(renderer, specularTarget);
+    displacementPass.render(renderer, displacementTarget);
+
     // You can access the generated maps as textures from occlusionTarget.texture,
     // specularTarget.texture, and displacementTarget.texture.
-    
+
     // You can then use these textures in your Three.js scene or save them as images.
 }
 
