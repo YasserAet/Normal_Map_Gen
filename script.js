@@ -1,42 +1,16 @@
-// Function to generate maps (occlusion, specular, and displacement)
-function generateMaps(imageSource) {
-    try {
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-        camera.position.z = 2;
+// Function to display an image in a canvas
+function displayImage(imageSource) {
+    const canvas = document.getElementById('previewCanvas');
+    const ctx = canvas.getContext('2d');
 
-        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        renderer.setSize(400, 400);
+    const image = new Image();
+    image.src = imageSource;
 
-        const canvasContainer = document.getElementById('canvas-container');
-        canvasContainer.innerHTML = '';
-        canvasContainer.appendChild(renderer.domElement);
-
-        const textureLoader = new THREE.TextureLoader();
-        textureLoader.load(
-            imageSource,
-            (texture) => {
-                const material = new THREE.MeshBasicMaterial({ map: texture });
-                const geometry = new THREE.PlaneGeometry(1, 1);
-                const mesh = new THREE.Mesh(geometry, material);
-
-                scene.add(mesh);
-
-                const animate = () => {
-                    requestAnimationFrame(animate);
-                    renderer.render(scene, camera);
-                };
-
-                animate();
-            },
-            undefined,
-            (error) => {
-                console.error('Error loading texture:', error);
-            }
-        );
-    } catch (error) {
-        console.error('Error in generateMaps:', error);
-    }
+    image.onload = () => {
+        canvas.width = image.width;
+        canvas.height = image.height;
+        ctx.drawImage(image, 0, 0);
+    };
 }
 
 // Event listener for file input
@@ -48,8 +22,8 @@ fileInput.addEventListener('change', (event) => {
         const reader = new FileReader();
 
         reader.onload = (e) => {
-            // Generate maps with the loaded image
-            generateMaps(e.target.result);
+            // Display the loaded image in the canvas
+            displayImage(e.target.result);
         };
 
         reader.readAsDataURL(file);
