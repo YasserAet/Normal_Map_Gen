@@ -43,17 +43,10 @@ function generateMaps() {
     const specularTarget = new THREE.WebGLRenderTarget(400, 400);
     const displacementTarget = new THREE.WebGLRenderTarget(400, 400);
 
-    // Use built-in shaders for occlusion, specular, and displacement
-    const occlusionPass = new THREE.ShaderPass(THREE.SSAOPass); // Requires the SSAOPass shader.
-    const specularPass = new THREE.ShaderPass(THREE.FXAAShader); // Requires the FXAAShader shader.
-    const displacementPass = new THREE.ShaderPass(THREE.DisplacementShader); // Requires the DisplacementShader shader.
+    // You can render the scene here to generate maps using built-in shaders or other techniques.
+    // However, creating these maps often requires custom shaders and is a complex task.
 
-    // Render the scene to generate maps
-    occlusionPass.render(renderer, occlusionTarget);
-    specularPass.render(renderer, specularTarget);
-    displacementPass.render(renderer, displacementTarget);
-
-    // You can access the generated maps as textures from occlusionTarget.texture,
+    // Once you have the maps, you can access them from occlusionTarget.texture,
     // specularTarget.texture, and displacementTarget.texture.
 
     // You can then use these textures in your Three.js scene or save them as images.
