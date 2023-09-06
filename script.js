@@ -36,20 +36,22 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
 directionalLight.position.set(1, 1, 1);
 scene.add(directionalLight);
 
+// Initialize SSAO (Screen Space Ambient Occlusion) pass
+const composer = new THREE.EffectComposer(renderer);
+const renderPass = new THREE.RenderPass(scene, camera);
+composer.addPass(renderPass);
+
+const ssaoPass = new THREE.SSAOPass(scene, camera, 1, 1); // Adjust parameters as needed
+ssaoPass.renderToScreen = true;
+composer.addPass(ssaoPass);
+
 // Function to generate maps (occlusion, specular, and displacement)
 function generateMaps() {
-    // Create render targets for each map
-    const occlusionTarget = new THREE.WebGLRenderTarget(400, 400);
-    const specularTarget = new THREE.WebGLRenderTarget(400, 400);
-    const displacementTarget = new THREE.WebGLRenderTarget(400, 400);
+    composer.render(); // Render the scene
 
-    // You can render the scene here to generate maps using built-in shaders or other techniques.
-    // However, creating these maps often requires custom shaders and is a complex task.
+    // You can access the generated occlusion map from ssaoPass.renderTargetDepth.texture
 
-    // Once you have the maps, you can access them from occlusionTarget.texture,
-    // specularTarget.texture, and displacementTarget.texture.
-
-    // You can then use these textures in your Three.js scene or save them as images.
+    // You can use this occlusion map in your Three.js scene or save it as an image.
 }
 
 // Event listener for file input
